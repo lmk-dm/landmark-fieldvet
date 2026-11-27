@@ -24,5 +24,8 @@ field-network = "landmark_field_network.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+landmark_field_network = ["data/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

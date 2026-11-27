@@ -1,0 +1,11 @@
+{
+  "schema": "network-hydraulics.two_pad_capacity.v1",
+  "fixture": "two_pad_gathering",
+  "source": "network-hydraulics.dump_two_pad_capacity",
+  "outage_duration_hours": 48.0,
+  "pad_rate_kg_s": 3.0,
+  "nominated_mcf_d_per_pad": 13491.906708368571,
+  "base_max_equal_mcf_d": 10535.58700583329,
+  "upgrade_max_equal_mcf_d": 21170.597066395523,
+  "outage_undelivered_mcf": 53967.62683347429
+}

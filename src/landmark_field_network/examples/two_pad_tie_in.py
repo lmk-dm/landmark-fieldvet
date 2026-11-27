@@ -1,14 +1,11 @@
 """Two-pad gas tie-in decision priced in Field Network.
 
-Capacities are taken from ``network-hydraulics`` ``two_pad_gathering``
-(``cargo run -p network-hydraulics --example dump_capacity``):
+Capacities come from ``network-hydraulics`` via
+``landmark_field_network.hydraulics_capacity.load_two_pad_capacity`` (live
+``dump_capacity`` when cargo/network-core are available; otherwise the frozen
+JSON under ``data/two_pad_capacity.json``).
 
-- nominated pad rate 3 kg/s ≈ 13,492 Mcf/d
-- base equal-pad max ≈ 10,536 Mcf/d each (shared trunk / CTB limit)
-- upgrade equal-pad max ≈ 21,171 Mcf/d each
-- 48 h compressor outage undelivered ≈ 53,968 Mcf (NPV only if schedule recovers)
-
-Field Network still owns selection economics. Hydraulics owns whether a schedule's
+Field Network owns selection economics. Hydraulics owns whether a schedule's
 rates are physically feasible; this example passes hydraulically derived arc
 capacities so the economic ranking sees the same bottleneck.
 """
@@ -17,6 +14,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from landmark_field_network.hydraulics_capacity import (
+    TwoPadCapacity,
+    load_two_pad_capacity,
+)
 from landmark_field_network.models import (
     Arc,
     Commodity,
@@ -34,15 +35,21 @@ from landmark_field_network.models import (
 from landmark_field_network.network import NetworkResult, solve_network
 from landmark_field_network.plan_effects import apply_plan
 
-# --- Hydraulically derived constants (network-hydraulics two_pad fixture) ---
-NOMINATED_MCF_D = 13_491.906708
-BASE_MAX_EQUAL_MCF_D = 10_535.587006
-UPGRADE_MAX_EQUAL_MCF_D = 21_170.597066
 DAYS_PER_PERIOD = 30.0
-# Shared gas capacity per period under base compressor (both pads competing).
-BASE_SHARED_GAS_PER_PERIOD = 2.0 * BASE_MAX_EQUAL_MCF_D * DAYS_PER_PERIOD
-UPGRADE_SHARED_GAS_PER_PERIOD = 2.0 * UPGRADE_MAX_EQUAL_MCF_D * DAYS_PER_PERIOD
+
+# Module-level Mcf figures are resolved from the hydraulics dump (live or frozen).
+_CAPACITY = load_two_pad_capacity()
+NOMINATED_MCF_D = _CAPACITY.nominated_mcf_d_per_pad
+BASE_MAX_EQUAL_MCF_D = _CAPACITY.base_max_equal_mcf_d
+UPGRADE_MAX_EQUAL_MCF_D = _CAPACITY.upgrade_max_equal_mcf_d
+BASE_SHARED_GAS_PER_PERIOD = _CAPACITY.base_shared_gas_mcf_d * DAYS_PER_PERIOD
+UPGRADE_SHARED_GAS_PER_PERIOD = _CAPACITY.upgrade_shared_gas_mcf_d * DAYS_PER_PERIOD
 PAD_GAS_PER_PERIOD = NOMINATED_MCF_D * DAYS_PER_PERIOD
+
+
+def two_pad_capacity() -> TwoPadCapacity:
+    """Return the capacity contract currently driving this example."""
+    return _CAPACITY
 
 # Default deferral for "second pad later" plans (periods).
 DEFAULT_DEFER_PERIODS = 6
@@ -65,8 +72,13 @@ def build_two_pad_tie_in(
     compressor_capital: float = 5_000_000.0,
     gas_price: float = 3.5,
     discount_rate_per_period: float = 0.008,
+    capacity: TwoPadCapacity | None = None,
 ) -> FieldModel:
-    """Field model whose shared gas capacity comes from the hydraulic study."""
+    """Field model whose shared gas capacity comes from the hydraulic dump."""
+    cap = capacity or _CAPACITY
+    pad_gas = cap.nominated_mcf_d_per_pad * DAYS_PER_PERIOD
+    base_shared = cap.base_shared_gas_mcf_d * DAYS_PER_PERIOD
+    upgrade_shared = cap.upgrade_shared_gas_mcf_d * DAYS_PER_PERIOD
     nodes = (
         Node("pad_a", NodeKind.PAD),
         Node("pad_b", NodeKind.PAD),
@@ -83,10 +95,10 @@ def build_two_pad_tie_in(
             "comp",
             "sales",
             Commodity.GAS,
-            BASE_SHARED_GAS_PER_PERIOD,
+            base_shared,
         ),
     )
-    curve = _flat_gas(n_periods, PAD_GAS_PER_PERIOD)
+    curve = _flat_gas(n_periods, pad_gas)
     projects = (
         Project(
             id="pad_a",
@@ -107,7 +119,7 @@ def build_two_pad_tie_in(
             kind=ProjectKind.FACILITY,
             capital=(compressor_capital,),
             capacity_adds={
-                "comp_gas": UPGRADE_SHARED_GAS_PER_PERIOD - BASE_SHARED_GAS_PER_PERIOD
+                "comp_gas": upgrade_shared - base_shared
             },
         ),
     )
