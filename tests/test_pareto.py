@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from landmark_fieldvet.examples import build_toy_field
-from landmark_fieldvet.pareto import available, solve_strategic_water, water_request_from_model
+from landmark_field_network.examples import build_toy_field
+from landmark_field_network.pareto import available, solve_strategic_water, water_request_from_model
 
 
 def test_water_request_extracts_disposal() -> None:

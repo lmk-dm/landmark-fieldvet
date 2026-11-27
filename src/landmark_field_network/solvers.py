@@ -19,7 +19,7 @@ def get_highs_solver(*, tee: bool = False, time_limit_sec: float | None = None) 
         solver = SolverFactory("highs")
     if solver is None or not solver.available(exception_flag=False):
         raise RuntimeError(
-            "HiGHS is required for landmark-fieldvet (install highspy). "
+            "HiGHS is required for landmark-field-network (install highspy). "
             "No alternate solver is wired."
         )
     if hasattr(solver, "config"):

@@ -1,25 +1,25 @@
-"""Minimal CLI for FieldVET proofs."""
+"""Minimal CLI for Field Network proofs."""
 
 from __future__ import annotations
 
 import argparse
 import json
 
-from landmark_fieldvet.attribution import attribute
-from landmark_fieldvet.examples import (
+from landmark_field_network.attribution import attribute
+from landmark_field_network.examples import (
     build_dual_bottleneck,
     build_operator_scale,
     build_toy_field,
     tie_in_decision,
 )
-from landmark_fieldvet.export import economics_project_list
-from landmark_fieldvet.hindcast import load_reported_production_csv, validate_fixed_plan
-from landmark_fieldvet.master import optimize_portfolio
-from landmark_fieldvet.models import Plan, Prices, StartDecision
-from landmark_fieldvet.network import solve_network
-from landmark_fieldvet.propose import propose_facility_projects
-from landmark_fieldvet.reconcile import reconcile_plan
-from landmark_fieldvet.scenarios import Scenario, evaluate_plan_scenarios
+from landmark_field_network.export import economics_project_list
+from landmark_field_network.hindcast import load_reported_production_csv, validate_fixed_plan
+from landmark_field_network.master import optimize_portfolio
+from landmark_field_network.models import Plan, Prices, StartDecision
+from landmark_field_network.network import solve_network
+from landmark_field_network.propose import propose_facility_projects
+from landmark_field_network.reconcile import reconcile_plan
+from landmark_field_network.scenarios import Scenario, evaluate_plan_scenarios
 from pathlib import Path
 
 
@@ -48,7 +48,10 @@ def _plan_payload(opt) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(prog="fieldvet", description="FieldVET network-aware portfolio")
+    parser = argparse.ArgumentParser(
+        prog="field-network",
+        description="Network-aware field portfolio selection and timing",
+    )
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_net = sub.add_parser("network", help="Solve network subproblem for a fixed toy plan")
@@ -86,7 +89,7 @@ def main(argv: list[str] | None = None) -> int:
 
     p_tie = sub.add_parser(
         "tie-in",
-        help="Enumerate two-pad gas tie-in plans (hydraulics → FieldVET)",
+        help="Enumerate two-pad gas tie-in plans (hydraulics → Field Network)",
     )
     p_tie.add_argument(
         "--defer",

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from landmark_fieldvet.examples import build_toy_field
-from landmark_fieldvet.models import Plan, Prices, StartDecision
-from landmark_fieldvet.scenarios import Scenario, evaluate_plan_scenarios
+from landmark_field_network.examples import build_toy_field
+from landmark_field_network.models import Plan, Prices, StartDecision
+from landmark_field_network.scenarios import Scenario, evaluate_plan_scenarios
 
 
 def test_price_scenarios_expected_and_cvar() -> None:

@@ -9,9 +9,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 from typing import Mapping, Sequence
 
-from landmark_fieldvet.models import Commodity, FieldModel, Plan, Prices, Project, TypeCurve
-from landmark_fieldvet.network import NetworkResult, solve_network
-from landmark_fieldvet.plan_effects import apply_plan
+from landmark_field_network.models import Commodity, FieldModel, Plan, Prices, Project, TypeCurve
+from landmark_field_network.network import NetworkResult, solve_network
+from landmark_field_network.plan_effects import apply_plan
 
 
 @dataclass(frozen=True)

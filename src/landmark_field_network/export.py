@@ -1,6 +1,6 @@
 """Plan export for downstream economics — not fiscal reconciliation.
 
-FieldVET's linear netbacks stay provisional. This module emits the selected
+Field Network's linear netbacks stay provisional. This module emits the selected
 projects, timing, and produced volume paths in a shape a DCF owner can consume
 (``landmark-economics`` / ARIES adapter). Calling the DCF kernel is a separate
 milestone; this only preserves the investment decision and its volumes.
@@ -13,8 +13,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from landmark_fieldvet.models import Commodity, FieldModel, Plan, ProjectKind
-from landmark_fieldvet.network import NetworkResult
+from landmark_field_network.models import Commodity, FieldModel, Plan, ProjectKind
+from landmark_field_network.network import NetworkResult
 
 
 @dataclass(frozen=True)
@@ -42,7 +42,7 @@ class EconomicsHandoff:
     projects: tuple[ExportedProject, ...]
     facility_starts: tuple[dict[str, Any], ...]
     notes: str = (
-        "Linear FieldVET NPV is provisional. Reconcile through "
+        "Linear Field Network NPV is provisional. Reconcile through "
         "landmark-economics / ARIES before reporting."
     )
 
@@ -67,7 +67,7 @@ def economics_project_list(
     plan: Plan,
     network: NetworkResult,
     *,
-    case_id: str = "fieldvet_plan",
+    case_id: str = "field-network_plan",
 ) -> EconomicsHandoff:
     """Build the downstream project list from a solved plan + network result."""
     starts = plan.start_map()

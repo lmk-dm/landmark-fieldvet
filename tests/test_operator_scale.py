@@ -6,12 +6,12 @@ NPV; formal dual-gap closure is proven through 16 pads and remains open at 20.
 
 from __future__ import annotations
 
-from landmark_fieldvet.attribution import attribute
-from landmark_fieldvet.examples import build_operator_scale
-from landmark_fieldvet.examples.operator_scale import N_FACILITIES, N_PADS
-from landmark_fieldvet.export import economics_project_list
-from landmark_fieldvet.master import optimize_portfolio
-from landmark_fieldvet.network import solve_network
+from landmark_field_network.attribution import attribute
+from landmark_field_network.examples import build_operator_scale
+from landmark_field_network.examples.operator_scale import N_FACILITIES, N_PADS
+from landmark_field_network.export import economics_project_list
+from landmark_field_network.master import optimize_portfolio
+from landmark_field_network.network import solve_network
 
 
 def test_operator_scale_inventory_shape() -> None:

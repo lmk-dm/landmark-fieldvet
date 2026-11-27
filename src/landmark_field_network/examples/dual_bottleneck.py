@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from landmark_fieldvet.models import (
+from landmark_field_network.models import (
     Arc,
     Commodity,
     FieldModel,

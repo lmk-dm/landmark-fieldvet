@@ -127,7 +127,7 @@ class Network:
 
 @dataclass(frozen=True)
 class FieldModel:
-    """Full FieldVET input for one area."""
+    """Full Field Network input for one area."""
 
     network: Network
     projects: tuple[Project, ...]

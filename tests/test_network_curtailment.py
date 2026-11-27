@@ -5,9 +5,9 @@ Two pads on a compressor sized for one must curtail. One pad alone must not.
 
 from __future__ import annotations
 
-from landmark_fieldvet.examples import build_toy_field
-from landmark_fieldvet.models import Commodity, Plan, StartDecision
-from landmark_fieldvet.network import solve_network
+from landmark_field_network.examples import build_toy_field
+from landmark_field_network.models import Commodity, Plan, StartDecision
+from landmark_field_network.network import solve_network
 
 
 def test_single_pad_flows_uncurtailed() -> None:

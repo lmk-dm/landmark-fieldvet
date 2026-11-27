@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from landmark_fieldvet.examples import build_toy_field
-from landmark_fieldvet.master import optimize_portfolio
-from landmark_fieldvet.models import Plan, StartDecision
-from landmark_fieldvet.network import solve_network
+from landmark_field_network.examples import build_toy_field
+from landmark_field_network.master import optimize_portfolio
+from landmark_field_network.models import Plan, StartDecision
+from landmark_field_network.network import solve_network
 
 
 def test_optimizer_funds_expansion_with_both_pads_when_valuable() -> None:

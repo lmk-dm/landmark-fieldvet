@@ -23,9 +23,9 @@ from pyomo.environ import (
     value,
 )
 
-from landmark_fieldvet.models import Commodity, FieldModel, NodeKind, Plan
-from landmark_fieldvet.plan_effects import PlanEffects, apply_plan
-from landmark_fieldvet.solvers import get_highs_solver
+from landmark_field_network.models import Commodity, FieldModel, NodeKind, Plan
+from landmark_field_network.plan_effects import PlanEffects, apply_plan
+from landmark_field_network.solvers import get_highs_solver
 
 
 @dataclass(frozen=True)
@@ -99,7 +99,7 @@ def solve_network_effects(
     disposal_nodes = {nd.id for nd in model.network.nodes if nd.kind is NodeKind.DISPOSAL}
     node_ids = [nd.id for nd in model.network.nodes]
 
-    m = ConcreteModel(name="fieldvet_network")
+    m = ConcreteModel(name="field-network_network")
     m.T = RangeSet(0, n - 1)
     m.ARCS = Set(initialize=[a.id for a in arcs])
     m.PADS = Set(initialize=pad_nodes)

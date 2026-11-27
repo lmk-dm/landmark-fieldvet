@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from landmark_fieldvet.examples import build_toy_field
-from landmark_fieldvet.models import Plan, StartDecision
-from landmark_fieldvet.network import solve_network
-from landmark_fieldvet.propose import propose_facility_projects, with_proposed_facilities
+from landmark_field_network.examples import build_toy_field
+from landmark_field_network.models import Plan, StartDecision
+from landmark_field_network.network import solve_network
+from landmark_field_network.propose import propose_facility_projects, with_proposed_facilities
 
 
 def test_propose_expansion_when_compressor_binds() -> None:

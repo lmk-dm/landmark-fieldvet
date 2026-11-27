@@ -1,4 +1,4 @@
-"""20-pad / 5-facility area from the FieldVET v2 next-actions target.
+"""20-pad / 5-facility area from the Field Network v2 next-actions target.
 
 Two gathering trains share a compressor and an oil takeaway trunk. A water
 disposal node is also capacity-limited. Facility projects unlock capacity on a
@@ -8,7 +8,7 @@ with staggered timing) so Benders can certify the case.
 
 from __future__ import annotations
 
-from landmark_fieldvet.models import (
+from landmark_field_network.models import (
     Arc,
     Commodity,
     FieldModel,

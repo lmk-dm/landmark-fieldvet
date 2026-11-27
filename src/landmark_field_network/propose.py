@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from landmark_fieldvet.models import FieldModel, Project, ProjectKind
-from landmark_fieldvet.network import NetworkResult, debottleneck_candidates
+from landmark_field_network.models import FieldModel, Project, ProjectKind
+from landmark_field_network.network import NetworkResult, debottleneck_candidates
 
 
 def propose_facility_projects(

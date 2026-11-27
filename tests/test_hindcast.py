@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from landmark_fieldvet.examples import build_toy_field
-from landmark_fieldvet.hindcast import load_reported_production_csv, validate_fixed_plan
-from landmark_fieldvet.models import Plan, StartDecision
+from landmark_field_network.examples import build_toy_field
+from landmark_field_network.hindcast import load_reported_production_csv, validate_fixed_plan
+from landmark_field_network.models import Plan, StartDecision
 
 CASE = Path(__file__).resolve().parents[1] / "cases" / "public_two_pad" / "reported_production.csv"
 

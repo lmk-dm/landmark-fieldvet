@@ -1,6 +1,6 @@
-"""Fiscal reconcile of a FieldVET plan through landmark-economics.
+"""Fiscal reconcile of a Field Network plan through landmark-economics.
 
-FieldVET's linear netbacks stay provisional. This module maps an
+Field Network's linear netbacks stay provisional. This module maps an
 ``EconomicsHandoff`` onto ``landmark_economics.dcf.run_dcf_from_forecast`` and
 returns project- and portfolio-level fiscal NPV for comparison.
 """
@@ -13,9 +13,9 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from landmark_fieldvet.export import EconomicsHandoff, ExportedProject, economics_project_list
-from landmark_fieldvet.models import FieldModel, Plan
-from landmark_fieldvet.network import NetworkResult
+from landmark_field_network.export import EconomicsHandoff, ExportedProject, economics_project_list
+from landmark_field_network.models import FieldModel, Plan
+from landmark_field_network.network import NetworkResult
 
 
 @dataclass(frozen=True)
@@ -74,7 +74,7 @@ def _ensure_landmark_economics() -> Any:
         / "engines"
         / "economics"
     )
-    # parents: reconcile.py → landmark_fieldvet → src → landmark-fieldvet → 50-decisions-economics
+    # parents: reconcile.py → landmark_field_network → src → landmark-field-network → 50-decisions-economics
     alt = here.parents[3] / "landmark-forecast" / "engines" / "economics"
     for path in (alt, candidate):
         if (path / "landmark_economics" / "dcf.py").is_file():
@@ -97,7 +97,7 @@ def _project_fiscal_npv(
     case_start: date,
 ) -> float:
     capital = float(sum(project.capital))
-    # FieldVET periods are planning steps (often months). Feed them as months.
+    # Field Network periods are planning steps (often months). Feed them as months.
     params = dcf_mod.DcfParams(
         price_oil_bbl=project.oil_price,
         differential_bbl=0.0,
@@ -176,7 +176,7 @@ def reconcile_handoff(
         engine="landmark_economics",
         notes=(
             "Development projects reconciled via landmark-economics volume DCF. "
-            "Facility capital remains in FieldVET linear NPV only; full ARIES deck "
+            "Facility capital remains in Field Network linear NPV only; full ARIES deck "
             "reconcile is a follow-on for reported reserves economics."
         ),
     )
@@ -187,7 +187,7 @@ def reconcile_plan(
     plan: Plan,
     network: NetworkResult,
     *,
-    case_id: str = "fieldvet_plan",
+    case_id: str = "field-network_plan",
     wi: float = 1.0,
     royalty: float = 0.0,
     case_start: date | None = None,

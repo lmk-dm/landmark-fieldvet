@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from landmark_fieldvet.models import (
+from landmark_field_network.models import (
     Commodity,
     FieldModel,
     Plan,

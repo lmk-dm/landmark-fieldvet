@@ -1,14 +1,14 @@
-# landmark-fieldvet
+# landmark-field-network
 
 Network-aware selection and timing of upstream projects — pads, facilities,
 pipelines, disposal, and commercial commitments — with portfolio value
 attributed back to projects.
 
 Standalone NPV ranking assumes project values add. In a capacity-limited field
-they do not. FieldVET prices each project through the shared oil / gas / water
+they do not. Field Network prices each project through the shared oil / gas / water
 network it flows into.
 
-Design: [`docs/FieldVET_Design_v2.md`](docs/FieldVET_Design_v2.md).
+Design: [`docs/FieldNetwork_Design_v2.md`](docs/FieldNetwork_Design_v2.md).
 
 ## What this owns
 
@@ -32,7 +32,8 @@ Design: [`docs/FieldVET_Design_v2.md`](docs/FieldVET_Design_v2.md).
 
 ## What this does not own
 
-- DCF kernel itself → `landmark-economics` (FieldVET calls it for reconcile; does not reimplement)
+- DCF kernel itself → `landmark-economics` (Field Network calls it for reconcile; does not reimplement)
+- Company capital allocation across assets → `landmark-capital` (consumes `EconomicsHandoff` as Candidates; see `landmark-capital/docs/ESTATE_CAPITAL_PATH.md`)
 - DSU pattern / spacing search → `landmark-dsu`
 - Fixed-EV capital/rig knapsack → `landmark-decision-simulation`
 - Gathering curtailment on a **given** schedule → `landmark-dsu` fieldopt-plan
@@ -41,7 +42,7 @@ Design: [`docs/FieldVET_Design_v2.md`](docs/FieldVET_Design_v2.md).
 ## Install
 
 ```bash
-cd 50-decisions-economics/landmark-fieldvet
+cd 50-decisions-economics/landmark-field-network
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
@@ -51,23 +52,23 @@ pytest
 ## Quick proof
 
 ```bash
-fieldvet network --pads a,b          # curtailment on shared compressor
-fieldvet network --pads a,b --expand # expansion clears curtailment
-fieldvet optimize                    # integrated MILP (default)
-fieldvet optimize --solver benders
-fieldvet optimize --case dual --solver benders --pads 4 --periods 12
-fieldvet optimize --case operator --solver benders --export /tmp/handoff.json
-fieldvet attribute
-fieldvet tie-in                      # hydraulic capacities → which / when / compressor
-fieldvet reconcile                   # landmark-economics fiscal NPV on the plan
-fieldvet propose                     # auto facility projects from shadow prices
-fieldvet scenarios                   # price scenarios + CVaR
-fieldvet hindcast                   # validate vs cases/public_two_pad CSV
+field-network network --pads a,b          # curtailment on shared compressor
+field-network network --pads a,b --expand # expansion clears curtailment
+field-network optimize                    # integrated MILP (default)
+field-network optimize --solver benders
+field-network optimize --case dual --solver benders --pads 4 --periods 12
+field-network optimize --case operator --solver benders --export /tmp/handoff.json
+field-network attribute
+field-network tie-in                      # hydraulic capacities → which / when / compressor
+field-network reconcile                   # landmark-economics fiscal NPV on the plan
+field-network propose                     # auto facility projects from shadow prices
+field-network scenarios                   # price scenarios + CVaR
+field-network hindcast                   # validate vs cases/public_two_pad CSV
 ```
 
 ```python
-from landmark_fieldvet import Plan, StartDecision, solve_network, optimize_portfolio, attribute
-from landmark_fieldvet.examples import build_toy_field
+from landmark_field_network import Plan, StartDecision, solve_network, optimize_portfolio, attribute
+from landmark_field_network.examples import build_toy_field
 
 model = build_toy_field()
 result = solve_network(model, Plan(starts=(StartDecision("pad_a", 0), StartDecision("pad_b", 0))))
@@ -82,7 +83,7 @@ CAPABILITY
 network_aware_project_selection
 
 OWNER
-landmark-fieldvet
+landmark-field-network
 
 ACTIVE PATHS
 toy / operator inventory
@@ -97,7 +98,7 @@ landmark-development POST /portfolio        → screening / experience
 
 TARGET PATH
 inventory + network + prices
-  → FieldVET plan
+  → Field Network plan
   → landmark-economics / ARIES reconcile
   → capital committee attribution views
 ```

@@ -1,6 +1,6 @@
 """DOE PARETO water-network adapter.
 
-PARETO remains the water-network reference. FieldVET maps disposal / recycle
+PARETO remains the water-network reference. Field Network maps disposal / recycle
 arcs into a PARETO-shaped request and, when ``project-pareto`` is installed,
 can call strategic optimization. Without the package, ``available()`` is false
 and callers get an explicit error — no silent reimplementation.
@@ -11,23 +11,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from landmark_fieldvet.models import Commodity, FieldModel
+from landmark_field_network.models import Commodity, FieldModel
 
 
 @dataclass(frozen=True)
 class ParetoWaterRequest:
-    """Minimal FieldVET → PARETO handoff (strategic water management shape)."""
+    """Minimal Field Network → PARETO handoff (strategic water management shape)."""
 
     case_id: str
     disposal_nodes: tuple[str, ...]
     recycle_arcs: tuple[str, ...]
     disposal_capacity: Mapping[str, float]
-    """node_id → period capacity (FieldVET units)."""
+    """node_id → period capacity (Field Network units)."""
     produced_water_forecast: Mapping[str, tuple[float, ...]]
     """pad_node → water by period."""
     notes: str = (
         "Install project-pareto and call solve_strategic_water() to run DOE PARETO. "
-        "FieldVET does not reimplement PARETO mathematics."
+        "Field Network does not reimplement PARETO mathematics."
     )
 
     def to_dict(self) -> dict[str, Any]:
@@ -55,10 +55,10 @@ def available() -> bool:
 def water_request_from_model(
     model: FieldModel,
     *,
-    case_id: str = "fieldvet_water",
+    case_id: str = "field-network_water",
 ) -> ParetoWaterRequest:
     """Extract disposal capacity and pad water forecasts for PARETO."""
-    from landmark_fieldvet.models import NodeKind, ProjectKind
+    from landmark_field_network.models import NodeKind, ProjectKind
 
     disposal_nodes = tuple(
         n.id for n in model.network.nodes if n.kind is NodeKind.DISPOSAL
@@ -101,7 +101,7 @@ def solve_strategic_water(request: ParetoWaterRequest) -> dict[str, Any]:
     if not available():
         raise ImportError(
             "project-pareto is not installed. "
-            "pip install 'landmark-fieldvet[pareto]' after publishing the extra, "
+            "pip install 'landmark-field-network[pareto]' after publishing the extra, "
             "or pip install project-pareto"
         )
     try:
@@ -116,14 +116,14 @@ def solve_strategic_water(request: ParetoWaterRequest) -> dict[str, Any]:
             "could not be imported; check the PARETO version"
         ) from exc
 
-    # PARETO expects a tabular data dictionary from get_data. FieldVET supplies a
+    # PARETO expects a tabular data dictionary from get_data. Field Network supplies a
     # reduced request; full spreadsheet ingestion remains the operator's job.
     return {
         "status": "not_configured",
         "message": (
             "PARETO imports resolved. Pass operator water-network tables through "
             "pareto.utilities.get_data.get_data into create_model/set_objective/"
-            "solve_model. FieldVET request summary is attached."
+            "solve_model. Field Network request summary is attached."
         ),
         "request": request.to_dict(),
         "api": {

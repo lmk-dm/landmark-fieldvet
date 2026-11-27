@@ -1,4 +1,4 @@
-"""Two-pad gas tie-in decision priced in FieldVET.
+"""Two-pad gas tie-in decision priced in Field Network.
 
 Capacities are taken from ``network-hydraulics`` ``two_pad_gathering``
 (``cargo run -p network-hydraulics --example dump_capacity``):
@@ -8,7 +8,7 @@ Capacities are taken from ``network-hydraulics`` ``two_pad_gathering``
 - upgrade equal-pad max ≈ 21,171 Mcf/d each
 - 48 h compressor outage undelivered ≈ 53,968 Mcf (NPV only if schedule recovers)
 
-FieldVET still owns selection economics. Hydraulics owns whether a schedule's
+Field Network still owns selection economics. Hydraulics owns whether a schedule's
 rates are physically feasible; this example passes hydraulically derived arc
 capacities so the economic ranking sees the same bottleneck.
 """
@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from landmark_fieldvet.models import (
+from landmark_field_network.models import (
     Arc,
     Commodity,
     FieldModel,
@@ -31,8 +31,8 @@ from landmark_fieldvet.models import (
     StartDecision,
     TypeCurve,
 )
-from landmark_fieldvet.network import NetworkResult, solve_network
-from landmark_fieldvet.plan_effects import apply_plan
+from landmark_field_network.network import NetworkResult, solve_network
+from landmark_field_network.plan_effects import apply_plan
 
 # --- Hydraulically derived constants (network-hydraulics two_pad fixture) ---
 NOMINATED_MCF_D = 13_491.906708
@@ -181,7 +181,7 @@ def verify_schedule_against_hydraulics(
 ) -> tuple[bool, tuple[str, ...]]:
     """Check each period's delivered gas against hydraulically derived capacity.
 
-    Uses the same ``comp_gas`` capacity series FieldVET applied (base vs upgrade
+    Uses the same ``comp_gas`` capacity series Field Network applied (base vs upgrade
     online). A schedule that exceeds that capacity is not an actionable plan.
     """
     effects = apply_plan(model, plan)

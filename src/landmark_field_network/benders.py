@@ -25,15 +25,15 @@ from pyomo.environ import (
 )
 from pyomo.opt import TerminationCondition
 
-from landmark_fieldvet.models import (
+from landmark_field_network.models import (
     Commodity,
     FieldModel,
     Plan,
     ProjectKind,
     StartDecision,
 )
-from landmark_fieldvet.network import NetworkResult, solve_network
-from landmark_fieldvet.solvers import get_highs_solver
+from landmark_field_network.network import NetworkResult, solve_network
+from landmark_field_network.solvers import get_highs_solver
 
 
 @dataclass(frozen=True)
@@ -119,7 +119,7 @@ def optimize_benders(
         }
     )
 
-    m = ConcreteModel(name="fieldvet_benders_master")
+    m = ConcreteModel(name="field-network_benders_master")
     m.T = RangeSet(0, n - 1)
     m.TAU = Set(initialize=list(start_times))
     m.J = Set(initialize=[p.id for p in projects])

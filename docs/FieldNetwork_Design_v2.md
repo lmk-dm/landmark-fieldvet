@@ -1,4 +1,4 @@
-# FieldVET: Network-Aware Project Selection for Upstream Development
+# Field Network: Network-Aware Project Selection for Upstream Development
 
 Design specification, draft 2 — Kyle Jones, November 2026
 
@@ -6,11 +6,11 @@ Design specification, draft 2 — Kyle Jones, November 2026
 
 Every operator ranks development projects by standalone NPV or profitability index and funds down the list until capital runs out. That method assumes value is additive. In an unconventional field it is not. A pad's value depends on whether the compressor station it flows to gets expanded. A compressor expansion's value depends on how many pads are brought online behind it. Two pads that share a gathering line compete for its capacity, so funding both is worth less than the sum of funding each. A firm transport contract is worth nothing without the wells to fill it and a great deal with them.
 
-FieldVET selects and times a portfolio of upstream projects (pads, facilities, pipelines, disposal, and commercial commitments) by computing each project's value through the shared network it flows into, not in isolation. It then reports what each project contributes to the portfolio, attributed so the contributions sum exactly to portfolio NPV. That attribution is the part no current tool provides, and it is the part a capital committee needs.
+Field Network selects and times a portfolio of upstream projects (pads, facilities, pipelines, disposal, and commercial commitments) by computing each project's value through the shared network it flows into, not in isolation. It then reports what each project contributes to the portfolio, attributed so the contributions sum exactly to portfolio NPV. That attribution is the part no current tool provides, and it is the part a capital committee needs.
 
 ## What carries over from DER-VET
 
-DER-VET's central idea is that resources sharing a constraint must be valued together. A battery cannot sell energy arbitrage and hold spinning reserve with the same megawatt in the same hour, so DER-VET co-optimizes the mix of resources and the services they provide rather than summing each one's value. FieldVET applies the same idea to projects that share network capacity. The shared constraint is pipe, compression, processing, and disposal capacity over time instead of a battery's megawatts in an hour.
+DER-VET's central idea is that resources sharing a constraint must be valued together. A battery cannot sell energy arbitrage and hold spinning reserve with the same megawatt in the same hour, so DER-VET co-optimizes the mix of resources and the services they provide rather than summing each one's value. Field Network applies the same idea to projects that share network capacity. The shared constraint is pipe, compression, processing, and disposal capacity over time instead of a battery's megawatts in an hour.
 
 Three DER-VET choices carry over directly. The tool optimizes the mix, not individual items. It decomposes total value into its sources so the answer can be explained. And it publishes its formulation and data so the answer can be trusted by parties with conflicting interests.
 
@@ -40,7 +40,7 @@ The open gap is to optimize over selection and timing with value computed throug
 
 ## Formulation
 
-FieldVET is a mixed-integer linear program with a natural decomposition.
+Field Network is a mixed-integer linear program with a natural decomposition.
 
 ### Projects and decisions
 
@@ -84,19 +84,19 @@ The primary output is not the optimal plan. It is an explanation of why the plan
 
 **Interaction values.** For pairs of projects that share an arc, the value of funding both minus the value of funding each alone. A positive interaction marks complements, such as a pad and the compressor behind it. A negative interaction marks substitutes, such as two pads competing for one gathering line. The interaction matrix shows a capital committee which projects must be approved or rejected together.
 
-**Attributed value.** Portfolio NPV allocated across projects by Shapley value, which averages each project's marginal contribution over many orderings in which the portfolio could be assembled. Shapley allocation is the only standard method whose shares sum exactly to the total while treating projects symmetrically. Exact computation is infeasible for hundreds of projects, so FieldVET estimates it by sampling orderings and solving each through the network subproblem, using the shadow prices to approximate the marginal contribution of facility projects cheaply.
+**Attributed value.** Portfolio NPV allocated across projects by Shapley value, which averages each project's marginal contribution over many orderings in which the portfolio could be assembled. Shapley allocation is the only standard method whose shares sum exactly to the total while treating projects symmetrically. Exact computation is infeasible for hundreds of projects, so Field Network estimates it by sampling orderings and solving each through the network subproblem, using the shadow prices to approximate the marginal contribution of facility projects cheaply.
 
 Attributed value replaces the ranked list. It answers the question an asset team actually brings to a capital meeting: what is this project worth to the company, given the rest of what we are funding?
 
 ## Architecture
 
-The core is a Python package built on Pyomo, chosen for its mature support for decomposition and for compatibility with DOE's open-source PARETO produced water optimizer, whose water network model FieldVET can reuse rather than rebuild. HiGHS is the default solver, with Gurobi optional for large portfolios.
+The core is a Python package built on Pyomo, chosen for its mature support for decomposition and for compatibility with DOE's open-source PARETO produced water optimizer, whose water network model Field Network can reuse rather than rebuild. HiGHS is the default solver, with Gurobi optional for large portfolios.
 
 Inputs are a project inventory with type curves and capital profiles, the network graph with base capacities, price and type-curve scenarios, resource availability, budgets, and commercial terms. These come from existing systems: type curves and economics parameters from ARIES, well and pad inventory from the development planning system, and the network from facilities engineering. Outputs are the selected plan with timing, monthly network flows and curtailment, the four value views, the shadow price map, and generated debottlenecking candidates, exported as Parquet and as an ARIES-compatible project list.
 
 ## Validation
 
-Validation runs in three steps. First, with the plan fixed to an operator's actual development schedule, FieldVET's network subproblem must reproduce the operator's reported production and curtailment within an agreed tolerance. This proves the network model before the optimizer is trusted. Second, the optimized plan's linear economics must reconcile with a full ARIES run of the same plan. Third, a hindcast: reconstruct a Delaware Basin development area from public Texas Railroad Commission permit, completion, and production data, run FieldVET with only the information available at a past decision date, and compare its plan and attributed values with what the operator built and how it performed.
+Validation runs in three steps. First, with the plan fixed to an operator's actual development schedule, Field Network's network subproblem must reproduce the operator's reported production and curtailment within an agreed tolerance. This proves the network model before the optimizer is trusted. Second, the optimized plan's linear economics must reconcile with a full ARIES run of the same plan. Third, a hindcast: reconstruct a Delaware Basin development area from public Texas Railroad Commission permit, completion, and production data, run Field Network with only the information available at a past decision date, and compare its plan and attributed values with what the operator built and how it performed.
 
 ## Open questions
 

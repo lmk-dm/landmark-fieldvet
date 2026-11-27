@@ -1,11 +1,11 @@
-# Capability map — FieldVET
+# Capability map — Field Network
 
 ```text
 CAPABILITY
 network_aware_project_selection
 
 OWNER
-landmark-fieldvet
+landmark-field-network
 
 ACTIVE PATHS
 fixed Plan
@@ -41,23 +41,23 @@ network-hydraulics two_pad_gathering
   → NPV + timing + compressor breakeven
   → verify_schedule_against_hydraulics
   proof: tests/test_two_pad_tie_in.py
-  CLI: fieldvet tie-in
+  CLI: field-network tie-in
 EconomicsHandoff
   → reconcile_plan → landmark_economics.dcf.run_dcf_from_forecast
   proof: tests/test_reconcile.py
-  CLI: fieldvet reconcile
+  CLI: field-network reconcile
 NetworkResult shadow prices
   → propose_facility_projects → FieldModel.projects
   proof: tests/test_propose.py
-  CLI: fieldvet propose
+  CLI: field-network propose
 fixed Plan + Scenario set
   → evaluate_plan_scenarios (E[NPV], CVaR)
   proof: tests/test_scenarios.py
-  CLI: fieldvet scenarios
+  CLI: field-network scenarios
 reported_production.csv (public case)
   → validate_fixed_plan
   proof: tests/test_hindcast.py
-  CLI: fieldvet hindcast
+  CLI: field-network hindcast
 FieldModel water arcs
   → water_request_from_model → DOE PARETO (optional project-pareto)
   proof: tests/test_pareto.py
@@ -77,16 +77,19 @@ field-architect
 TARGET PATH
 consumer (development / capital planning)
   → FieldModel contract
-  → landmark-fieldvet owner
+  → landmark-field-network owner
   → Plan + AttributionReport
   → landmark-economics / ARIES fiscal reconcile
+  → EconomicsHandoff (+ fiscal NPV)
+  → landmark-capital AllocationModel (company capital compile)
+  → proof: landmark-capital/docs/ESTATE_CAPITAL_PATH.md + validation/coherence_pipeline.py
 
 DELETE AFTER MIGRATION
-none yet — no prior FieldVET implementation existed
+none yet — no prior Field Network implementation existed
 
 PROOF
 pytest in this repo
-fieldvet network|optimize|attribute on toy field
+field-network network|optimize|attribute on toy field
 
 STATUS
 MOVED_NOT_WIRED → no: greenfield owner

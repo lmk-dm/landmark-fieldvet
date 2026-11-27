@@ -9,8 +9,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from landmark_fieldvet.examples import build_dual_bottleneck
-from landmark_fieldvet.master import optimize_portfolio
+from landmark_field_network.examples import build_dual_bottleneck
+from landmark_field_network.master import optimize_portfolio
 
 ABS_TOL = 5.0
 REL_TOL = 5e-3

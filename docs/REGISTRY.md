@@ -2,13 +2,13 @@
 
 Canonical workspace files updated 2026-11-26:
 
-- `portfolio.yaml` → `landmark-fieldvet` status `keep`, zone `50-decisions-economics`
+- `portfolio.yaml` → `landmark-field-network` status `keep`, zone `50-decisions-economics`
 - `LANDMARK_REPOS.md` → table row + narrative owner blurb
 
 ## portfolio.yaml (excerpt)
 
 ```yaml
-landmark-fieldvet:
+landmark-field-network:
   status: keep
   recommended_zone: 50-decisions-economics
   notes: >-
@@ -26,7 +26,7 @@ landmark-fieldvet:
 
 ## Boundary vs overlaps
 
-| Sibling | Sibling owns | FieldVET owns |
+| Sibling | Sibling owns | Field Network owns |
 |---|---|---|
 | `landmark-decision-simulation` | fixed-EV capital/rig knapsack | network-priced selection |
 | `landmark-dsu` fieldopt-plan | curtail a fixed schedule | choose projects/timing through the network |

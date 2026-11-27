@@ -1,6 +1,6 @@
 # Public case: two-pad shared compressor
 
-Open demonstration case for FieldVET. Inventories and prices are synthetic;
+Open demonstration case for Field Network. Inventories and prices are synthetic;
 they do not contain operator confidential data.
 
 ## What it shows
@@ -13,15 +13,15 @@ both pads with the expansion when the expansion capital is economic.
 
 ```bash
 pip install -e ".[dev]"
-fieldvet network --pads a,b
-fieldvet network --pads a,b --expand
-fieldvet optimize
-fieldvet attribute
-fieldvet tie-in
+field-network network --pads a,b
+field-network network --pads a,b --expand
+field-network optimize
+field-network attribute
+field-network tie-in
 ```
 
 Hindcast CSV (`reported_production.csv`) is a synthetic “reported” series for
-the fixed both-pads+expand plan, used by `landmark_fieldvet.hindcast`.
+the fixed both-pads+expand plan, used by `landmark_field_network.hindcast`.
 
 ## License
 

@@ -1,8 +1,8 @@
-"""Consumer path: hydraulic capacities → enumerated FieldVET plans → NPV."""
+"""Consumer path: hydraulic capacities → enumerated Field Network plans → NPV."""
 
 from __future__ import annotations
 
-from landmark_fieldvet.examples.two_pad_tie_in import (
+from landmark_field_network.examples.two_pad_tie_in import (
     BASE_SHARED_GAS_PER_PERIOD,
     PAD_GAS_PER_PERIOD,
     UPGRADE_SHARED_GAS_PER_PERIOD,
@@ -13,8 +13,8 @@ from landmark_fieldvet.examples.two_pad_tie_in import (
     tie_in_decision,
     verify_schedule_against_hydraulics,
 )
-from landmark_fieldvet.models import Commodity, Plan, StartDecision
-from landmark_fieldvet.network import solve_network
+from landmark_field_network.models import Commodity, Plan, StartDecision
+from landmark_field_network.network import solve_network
 
 
 def test_both_pads_curtail_without_upgrade() -> None:

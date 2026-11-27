@@ -24,7 +24,7 @@ from pyomo.environ import (
     value,
 )
 
-from landmark_fieldvet.models import (
+from landmark_field_network.models import (
     Commodity,
     FieldModel,
     NodeKind,
@@ -32,8 +32,8 @@ from landmark_fieldvet.models import (
     ProjectKind,
     StartDecision,
 )
-from landmark_fieldvet.network import NetworkResult, solve_network
-from landmark_fieldvet.solvers import get_highs_solver
+from landmark_field_network.network import NetworkResult, solve_network
+from landmark_field_network.solvers import get_highs_solver
 
 SolverMethod = Literal["integrated", "benders"]
 
@@ -60,7 +60,7 @@ def optimize_portfolio(
 ) -> OptimizeResult:
     """Choose starts to maximize network-priced NPV under budgets and logic."""
     if method == "benders":
-        from landmark_fieldvet.benders import optimize_benders
+        from landmark_field_network.benders import optimize_benders
 
         result = optimize_benders(
             model,
@@ -102,7 +102,7 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
     disposal = {nd.id for nd in nodes if nd.kind is NodeKind.DISPOSAL}
     devel = [p for p in projects if p.kind is ProjectKind.DEVELOPMENT]
 
-    m = ConcreteModel(name="fieldvet_master")
+    m = ConcreteModel(name="field-network_master")
     m.T = RangeSet(0, n - 1)
     m.TAU = Set(initialize=list(start_times))
     m.J = Set(initialize=[p.id for p in projects])

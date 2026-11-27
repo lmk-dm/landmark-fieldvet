@@ -12,8 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
-from landmark_fieldvet.models import Commodity, FieldModel, Plan
-from landmark_fieldvet.network import solve_network
+from landmark_field_network.models import Commodity, FieldModel, Plan
+from landmark_field_network.network import solve_network
 
 
 @dataclass(frozen=True)

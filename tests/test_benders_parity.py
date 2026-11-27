@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from landmark_fieldvet.examples import build_dual_bottleneck, build_toy_field
-from landmark_fieldvet.master import optimize_portfolio
-from landmark_fieldvet.network import solve_network
+from landmark_field_network.examples import build_dual_bottleneck, build_toy_field
+from landmark_field_network.master import optimize_portfolio
+from landmark_field_network.network import solve_network
 
 ABS_TOL = 1.0
 REL_TOL = 1e-3

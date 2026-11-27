@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from landmark_fieldvet.attribution import attribute
-from landmark_fieldvet.examples import build_toy_field
-from landmark_fieldvet.models import Plan, StartDecision
+from landmark_field_network.attribution import attribute
+from landmark_field_network.examples import build_toy_field
+from landmark_field_network.models import Plan, StartDecision
 
 
 def test_pad_and_compressor_are_complements() -> None:

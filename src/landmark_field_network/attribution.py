@@ -11,8 +11,8 @@ import itertools
 import random
 from dataclasses import dataclass
 
-from landmark_fieldvet.models import FieldModel, Plan, StartDecision
-from landmark_fieldvet.network import NetworkResult, solve_network
+from landmark_field_network.models import FieldModel, Plan, StartDecision
+from landmark_field_network.network import NetworkResult, solve_network
 
 
 @dataclass(frozen=True)

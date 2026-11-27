@@ -1,4 +1,4 @@
-name: landmark-fieldvet
+name: landmark-field-network
 version: 0.1.0
 architecture_layer: decision_engine
 description: >
@@ -46,6 +46,8 @@ integrates_with:
   - landmark-development
   - landmark-dsu
   - landmark-decision-simulation
+  - landmark-capital
+  - landmark-network-core
 contracts_version: "1"
 
 # Boundary notes.
@@ -56,10 +58,10 @@ contracts_version: "1"
 #     development_optimization   -> landmark-dsu (pattern / sequence / spacing).
 #     portfolio_knapsack         -> landmark-decision-simulation mixed_integer
 #                                  over fixed alternative EVs. That path has no
-#                                  network flow; FieldVET is the network owner.
+#                                  network flow; Field Network is the network owner.
 #     gathering_curtailment_on_fixed_schedule
 #                                -> landmark-dsu fieldopt-plan Capacity constraints
-#                                  curtail a given schedule. FieldVET chooses
+#                                  curtail a given schedule. Field Network chooses
 #                                  which projects and when, priced through the
 #                                  network.
 #     decision_experience        -> landmark-development product UX.
@@ -67,4 +69,4 @@ contracts_version: "1"
 #                                  (explicitly not a facilities network optimizer).
 #
 #   Water network formulations may reuse DOE PARETO via Pyomo; PARETO remains
-#   the water-network reference, not a second FieldVET kernel.
+#   the water-network reference, not a second Field Network kernel.

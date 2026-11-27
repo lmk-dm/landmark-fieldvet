@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from landmark_fieldvet.examples import build_toy_field
-from landmark_fieldvet.models import Plan, StartDecision
-from landmark_fieldvet.network import solve_network
-from landmark_fieldvet.reconcile import reconcile_plan
+from landmark_field_network.examples import build_toy_field
+from landmark_field_network.models import Plan, StartDecision
+from landmark_field_network.network import solve_network
+from landmark_field_network.reconcile import reconcile_plan
 
 
 def test_reconcile_returns_fiscal_npv() -> None:
