@@ -100,5 +100,9 @@ DUPLICATED meaning with decision-simulation knapsack → NO (different capabilit
 partial: Benders dual-gap closure at 20 pads; full ARIES deck binary path;
   live PARETO solve_model data tables; volume-DCF reconcile + PARETO adapter active
 two_pad capacities: CANONICAL via live dump_capacity (frozen JSON fallback)
+Reference Energy spare contracts: CANONICAL via publish-capacity / write_contracts
+  → landmark-capital data/reference-energy/*_capacity.json
+  proof: landmark-capital validation/capacity_contracts_pipeline.py
 ```
+
 

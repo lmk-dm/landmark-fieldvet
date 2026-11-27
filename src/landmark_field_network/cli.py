@@ -11,6 +11,7 @@ from landmark_field_network.examples import (
     build_operator_scale,
     build_toy_field,
     tie_in_decision,
+    write_contracts,
 )
 from landmark_field_network.export import economics_project_list
 from landmark_field_network.hindcast import load_reported_production_csv, validate_fixed_plan
@@ -110,6 +111,16 @@ def main(argv: list[str] | None = None) -> int:
             / "public_two_pad"
             / "reported_production.csv"
         ),
+    )
+
+    p_cap = sub.add_parser(
+        "publish-capacity",
+        help="Write Reference Energy spare-capacity JSON contracts for landmark-capital",
+    )
+    p_cap.add_argument(
+        "--out",
+        required=True,
+        help="output directory (writes *_capacity.json)",
     )
 
     args = parser.parse_args(argv)
@@ -302,6 +313,22 @@ def main(argv: list[str] | None = None) -> int:
         report = validate_fixed_plan(model, plan, reported, tol=0.01)
         print(json.dumps(report.to_dict(), indent=2))
         return 0 if report.passed else 2
+
+    if args.cmd == "publish-capacity":
+        out = Path(args.out)
+        paths = write_contracts(out)
+        print(
+            json.dumps(
+                {
+                    "out": str(out.resolve()),
+                    "files": [str(p.name) for p in paths],
+                    "count": len(paths),
+                    "source": "landmark-field-network.examples.reference_capacity",
+                },
+                indent=2,
+            )
+        )
+        return 0
 
     return 1
 
