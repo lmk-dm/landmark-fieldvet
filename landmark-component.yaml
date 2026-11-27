@@ -1,0 +1,66 @@
+name: landmark-fieldvet
+version: 0.1.0
+architecture_layer: decision_engine
+description: >
+  Network-aware selection and timing of upstream development projects
+  (pads, facilities, pipelines, disposal, commercial commitments). Project
+  value is computed through shared oil/gas/water network capacity, not from
+  standalone fixed profiles. Attributes portfolio NPV back to projects
+  (standalone, marginal, pairwise interaction, sampled Shapley). Does not
+  own DCF fiscal reconciliation (landmark-economics / ARIES), DSU pattern
+  search (landmark-dsu), or domain-agnostic knapsack evaluation
+  (landmark-decision-simulation).
+consumes:
+  - development_inventory
+  - type_curve
+  - facility_network
+  - economic_assumptions
+produces:
+  - network_aware_portfolio_plan
+  - network_flow_and_curtailment
+  - capacity_shadow_prices
+  - project_value_attribution
+  - debottleneck_candidates
+interfaces:
+  cli: true
+  api: false
+  python: true
+  mcp: false
+storage:
+  iceberg: false
+  postgres: false
+  postgis: false
+  object_storage: false
+  duckdb: false
+capabilities:
+  - network_aware_project_selection
+exclusive_capabilities:
+  - network_aware_project_selection
+integrates_with:
+  - landmark-economics
+  - landmark-forecast
+  - landmark-development
+  - landmark-dsu
+  - landmark-decision-simulation
+contracts_version: "1"
+
+# Boundary notes.
+#   This component does NOT own:
+#     economics_dcf              -> landmark-economics / ARIES. Linear netbacks
+#                                  inside the optimizer are provisional; reported
+#                                  cash flows reconcile through the DCF owner.
+#     development_optimization   -> landmark-dsu (pattern / sequence / spacing).
+#     portfolio_knapsack         -> landmark-decision-simulation mixed_integer
+#                                  over fixed alternative EVs. That path has no
+#                                  network flow; FieldVET is the network owner.
+#     gathering_curtailment_on_fixed_schedule
+#                                -> landmark-dsu fieldopt-plan Capacity constraints
+#                                  curtail a given schedule. FieldVET chooses
+#                                  which projects and when, priced through the
+#                                  network.
+#     decision_experience        -> landmark-development product UX.
+#     field_architect_canvas     -> landmark-development/engines/field-architect
+#                                  (explicitly not a facilities network optimizer).
+#
+#   Water network formulations may reuse DOE PARETO via Pyomo; PARETO remains
+#   the water-network reference, not a second FieldVET kernel.
