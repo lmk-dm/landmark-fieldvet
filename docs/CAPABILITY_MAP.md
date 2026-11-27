@@ -48,7 +48,12 @@ network-hydraulics dump_two_pad_capacity / dump_capacity JSON
 EconomicsHandoff
   → reconcile_plan → landmark_economics.dcf.run_dcf_from_forecast
   proof: tests/test_reconcile.py
-  CLI: field-network reconcile
+  CLI: field-network reconcile (fixed toy plan)
+optimize → same-plan reconcile (capital coefficients)
+  → economics_project_list(opt.plan) + reconcile_plan(opt.plan, opt.network)
+  proof: tests/test_optimize_reconcile_path.py
+  CLI: field-network optimize --export … --reconcile-out …
+  consumer: landmark-capital validation/coherence_pipeline.py
 NetworkResult shadow prices
   → propose_facility_projects → FieldModel.projects
   proof: tests/test_propose.py

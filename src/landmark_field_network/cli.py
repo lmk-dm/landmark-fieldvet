@@ -80,6 +80,11 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="write economics project-list JSON to this path",
     )
+    p_opt.add_argument(
+        "--reconcile-out",
+        default=None,
+        help="fiscal-reconcile the optimized plan (same opt.plan/network) to this JSON path",
+    )
 
     p_attr = sub.add_parser("attribute", help="Optimize toy field then print value attribution")
     p_attr.add_argument(
@@ -99,7 +104,10 @@ def main(argv: list[str] | None = None) -> int:
         help="periods to defer the second pad / late upgrade plans",
     )
 
-    sub.add_parser("reconcile", help="Fiscal reconcile toy both+expand via landmark-economics")
+    sub.add_parser(
+        "reconcile",
+        help="Fiscal reconcile fixed toy both+expand (use optimize --reconcile-out for capital path)",
+    )
     sub.add_parser("propose", help="Propose facility projects from toy both-pads shadow prices")
     sub.add_parser("scenarios", help="Price scenarios + CVaR on toy both-pads plan")
     p_hc = sub.add_parser("hindcast", help="Validate fixed plan vs reported_production.csv")
@@ -167,12 +175,21 @@ def main(argv: list[str] | None = None) -> int:
             max_iterations=120 if args.case == "operator" else 80,
         )
         payload = _plan_payload(opt)
+        case_id = f"{args.case}_{args.solver}"
         if args.export:
             handoff = economics_project_list(
-                model, opt.plan, opt.network, case_id=f"{args.case}_{args.solver}"
+                model, opt.plan, opt.network, case_id=case_id
             )
             path = handoff.write_json(args.export)
             payload["economics_handoff"] = str(path)
+        if args.reconcile_out:
+            report = reconcile_plan(model, opt.plan, opt.network, case_id=case_id)
+            out = Path(args.reconcile_out)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(json.dumps(report.to_dict(), indent=2) + "\n")
+            payload["reconcile"] = str(out)
+            payload["reconcile_engine"] = report.engine
+            payload["portfolio_npv_fiscal"] = report.portfolio_npv_fiscal
         print(json.dumps(payload, indent=2))
         return 0
 
