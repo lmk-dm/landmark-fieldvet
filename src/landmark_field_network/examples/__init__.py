@@ -7,6 +7,7 @@ from landmark_field_network.examples.mature_water import (
     export_for_capital,
 )
 from landmark_field_network.examples.operator_scale import build_operator_scale
+from landmark_field_network.examples.reference_capacity import contracts, write_contracts
 from landmark_field_network.examples.toy_field import build_toy_field
 from landmark_field_network.examples.two_pad_tie_in import (
     build_two_pad_tie_in,
@@ -23,9 +24,11 @@ __all__ = [
     "build_toy_field",
     "build_two_pad_tie_in",
     "compressor_capex_breakeven",
+    "contracts",
     "enumerate_tie_in_plans",
     "export_capacity_contract",
     "export_for_capital",
     "preferred_plan",
     "tie_in_decision",
+    "write_contracts",
 ]
