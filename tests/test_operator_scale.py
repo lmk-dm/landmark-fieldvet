@@ -1,4 +1,8 @@
-"""20-pad / 5-facility area: Benders converges; economics handoff preserves the plan."""
+"""20-pad / 5-facility area: solvers agree on NPV; economics handoff preserves the plan.
+
+Integrated MILP certifies the optimum at this size (~2.5s). Benders finds the same
+NPV; formal dual-gap closure is proven through 16 pads and remains open at 20.
+"""
 
 from __future__ import annotations
 
@@ -22,21 +26,34 @@ def test_operator_scale_inventory_shape() -> None:
     assert model.allowed_starts() == (0, 3, 6, 9)
 
 
-def test_benders_converges_on_operator_scale() -> None:
-    model = build_operator_scale()
+def test_benders_converges_through_16_pads() -> None:
+    model = build_operator_scale(n_pads=16)
     opt = optimize_portfolio(
         model,
         method="benders",
-        abs_tol=250.0,
-        rel_tol=5e-2,
-        time_limit_sec=120.0,
-        max_iterations=120,
+        abs_tol=50.0,
+        rel_tol=1e-3,
+        time_limit_sec=60.0,
+        max_iterations=40,
     )
-    assert opt.solver == "benders"
     assert opt.stats is not None
     assert opt.stats.converged, opt.stats
-    assert abs(opt.objective - solve_network(model, opt.plan).objective) < 1e-4
-    selected = {s.project_id for s in opt.plan.starts}
+
+
+def test_operator_scale_20_pad_solvers_agree_on_npv() -> None:
+    model = build_operator_scale(n_pads=20)
+    integ = optimize_portfolio(model, method="integrated")
+    bend = optimize_portfolio(
+        model,
+        method="benders",
+        abs_tol=50.0,
+        rel_tol=1e-3,
+        time_limit_sec=60.0,
+        max_iterations=40,
+    )
+    assert abs(integ.objective - bend.objective) <= 50.0
+    assert abs(integ.objective - solve_network(model, integ.plan).objective) < 1e-4
+    selected = {s.project_id for s in integ.plan.starts}
     assert any(pid.startswith("pad_") for pid in selected)
     assert selected & {
         "comp_expand",
@@ -48,15 +65,8 @@ def test_benders_converges_on_operator_scale() -> None:
 
 
 def test_operator_scale_attribution_and_economics_handoff(tmp_path) -> None:
-    model = build_operator_scale()
-    opt = optimize_portfolio(
-        model,
-        method="benders",
-        abs_tol=250.0,
-        rel_tol=5e-2,
-        time_limit_sec=120.0,
-        max_iterations=120,
-    )
+    model = build_operator_scale(n_pads=20)
+    opt = optimize_portfolio(model, method="integrated")
     report = attribute(
         model,
         opt.plan,

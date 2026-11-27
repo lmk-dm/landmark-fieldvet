@@ -28,9 +28,13 @@ Plan
   → attribute (standalone, marginal, interaction, Shapley)
   proof: tests/test_attribution.py
 20-pad / 5-facility inventory
-  → optimize_portfolio(method=benders)
-  → attribute + economics_project_list handoff
+  → optimize_portfolio(method=integrated)  # certifies NPV (~2.5s)
+  → optimize_portfolio(method=benders)     # same NPV; dual gap open at n=20
+  → attribute (standalone/marginal) + economics_project_list handoff
   proof: tests/test_operator_scale.py
+Benders formal convergence
+  → fix_to_earliest_start inventories through 16 pads
+  proof: tests/test_operator_scale.py::test_benders_converges_through_16_pads
 network-hydraulics two_pad_gathering
   → shared gas capacity (Mcf/period)
   → enumerate_tie_in_plans / tie_in_decision
@@ -68,5 +72,5 @@ fieldvet network|optimize|attribute on toy field
 STATUS
 MOVED_NOT_WIRED → no: greenfield owner
 DUPLICATED meaning with decision-simulation knapsack → NO (different capability)
-partial: ARIES / landmark-economics fiscal reconcile and PARETO water bind still open
+partial: Benders dual-gap closure at 20 pads; ARIES fiscal reconcile; PARETO water
 ```

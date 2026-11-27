@@ -9,6 +9,8 @@ uv.lock
 .mypy_cache/
 .ruff_cache/
 examples/benders_scaling_last.json
+profile-*.out
+pytest-*.out
 pytest-operator.out
 profile-operator.out
 *.out

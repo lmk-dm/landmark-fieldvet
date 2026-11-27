@@ -20,7 +20,8 @@ Design: [`docs/FieldVET_Design_v2.md`](docs/FieldVET_Design_v2.md).
 | Benders master ↔ network LP | **active** (`--solver benders`) |
 | Standalone / marginal / interaction / Shapley | **active** (exact Shapley for n≤6) |
 | Dual-bottleneck parity / scaling probe | **active** |
-| 20-pad / 5-facility operator-scale (Benders) | **active** (staggered earliest-start selection) |
+| 20-pad / 5-facility operator-scale | **active** (integrated certifies NPV; Benders matches) |
+| Benders formal gap closure | **active** through 16 pads; open at 20 |
 | Economics project-list handoff (volumes + timing) | **active** (not fiscal reconcile) |
 | ARIES / `landmark-economics` fiscal reconcile | reserved |
 | DOE PARETO water reuse | reserved |

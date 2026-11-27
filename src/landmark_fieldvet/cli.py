@@ -123,18 +123,6 @@ def main(argv: list[str] | None = None) -> int:
                 n_periods=args.periods,
                 n_pads=20 if args.pads == 4 else args.pads,
             )
-            if args.solver == "integrated":
-                # Integrated MILP is the small-case reference; operator-scale uses Benders.
-                print(
-                    json.dumps(
-                        {
-                            "error": "operator-scale requires --solver benders",
-                            "hint": "integrated MILP is the reference for toy/dual only",
-                        },
-                        indent=2,
-                    )
-                )
-                return 2
         else:
             model = build_dual_bottleneck(n_periods=args.periods, n_pads=args.pads)
         opt = optimize_portfolio(
