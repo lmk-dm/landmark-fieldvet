@@ -53,6 +53,7 @@ fieldvet optimize --solver benders
 fieldvet optimize --case dual --solver benders --pads 4 --periods 12
 fieldvet optimize --case operator --solver benders --export /tmp/handoff.json
 fieldvet attribute
+fieldvet tie-in                      # hydraulic capacities → which / when / compressor
 ```
 
 ```python
