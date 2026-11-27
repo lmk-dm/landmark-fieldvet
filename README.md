@@ -20,6 +20,8 @@ Design: [`docs/FieldVET_Design_v2.md`](docs/FieldVET_Design_v2.md).
 | Benders master ↔ network LP | **active** (`--solver benders`) |
 | Standalone / marginal / interaction / Shapley | **active** (exact Shapley for n≤6) |
 | Dual-bottleneck parity / scaling probe | **active** |
+| 20-pad / 5-facility operator-scale (Benders) | **active** |
+| Economics project-list handoff (volumes + timing) | **active** (not fiscal reconcile) |
 | ARIES / `landmark-economics` fiscal reconcile | reserved |
 | DOE PARETO water reuse | reserved |
 
@@ -49,6 +51,7 @@ fieldvet network --pads a,b --expand # expansion clears curtailment
 fieldvet optimize                    # integrated MILP (default)
 fieldvet optimize --solver benders
 fieldvet optimize --case dual --solver benders --pads 4 --periods 12
+fieldvet optimize --case operator --solver benders --export /tmp/handoff.json
 fieldvet attribute
 ```
 

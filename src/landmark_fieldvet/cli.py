@@ -6,7 +6,13 @@ import argparse
 import json
 
 from landmark_fieldvet.attribution import attribute
-from landmark_fieldvet.examples import build_dual_bottleneck, build_toy_field
+from landmark_fieldvet.examples import (
+    build_dual_bottleneck,
+    build_operator_scale,
+    build_toy_field,
+    tie_in_decision,
+)
+from landmark_fieldvet.export import economics_project_list
 from landmark_fieldvet.master import optimize_portfolio
 from landmark_fieldvet.models import Plan, StartDecision
 from landmark_fieldvet.network import solve_network
@@ -53,19 +59,35 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_opt.add_argument(
         "--case",
-        choices=("toy", "dual"),
+        choices=("toy", "dual", "operator"),
         default="toy",
-        help="toy two-pad field or dual-bottleneck benchmark",
+        help="toy, dual-bottleneck, or 20-pad operator-scale",
     )
-    p_opt.add_argument("--pads", type=int, default=4, help="pad count for dual case")
-    p_opt.add_argument("--periods", type=int, default=12, help="periods for dual case")
+    p_opt.add_argument("--pads", type=int, default=4, help="pad count for dual/operator")
+    p_opt.add_argument("--periods", type=int, default=12, help="periods for dual/operator")
     p_opt.add_argument("--time-limit", type=float, default=120.0)
+    p_opt.add_argument(
+        "--export",
+        default=None,
+        help="write economics project-list JSON to this path",
+    )
 
     p_attr = sub.add_parser("attribute", help="Optimize toy field then print value attribution")
     p_attr.add_argument(
         "--solver",
         choices=("integrated", "benders"),
         default="integrated",
+    )
+
+    p_tie = sub.add_parser(
+        "tie-in",
+        help="Enumerate two-pad gas tie-in plans (hydraulics → FieldVET)",
+    )
+    p_tie.add_argument(
+        "--defer",
+        type=int,
+        default=6,
+        help="periods to defer the second pad / late upgrade plans",
     )
 
     args = parser.parse_args(argv)
@@ -96,14 +118,40 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd == "optimize":
         if args.case == "toy":
             model = build_toy_field()
+        elif args.case == "operator":
+            model = build_operator_scale(
+                n_periods=args.periods,
+                n_pads=20 if args.pads == 4 else args.pads,
+            )
+            if args.solver == "integrated":
+                # Integrated MILP is the small-case reference; operator-scale uses Benders.
+                print(
+                    json.dumps(
+                        {
+                            "error": "operator-scale requires --solver benders",
+                            "hint": "integrated MILP is the reference for toy/dual only",
+                        },
+                        indent=2,
+                    )
+                )
+                return 2
         else:
             model = build_dual_bottleneck(n_periods=args.periods, n_pads=args.pads)
         opt = optimize_portfolio(
             model,
             method=args.solver,
             time_limit_sec=args.time_limit,
+            abs_tol=25.0 if args.case == "operator" else 1.0,
+            max_iterations=60 if args.case == "operator" else 80,
         )
-        print(json.dumps(_plan_payload(opt), indent=2))
+        payload = _plan_payload(opt)
+        if args.export:
+            handoff = economics_project_list(
+                model, opt.plan, opt.network, case_id=f"{args.case}_{args.solver}"
+            )
+            path = handoff.write_json(args.export)
+            payload["economics_handoff"] = str(path)
+        print(json.dumps(payload, indent=2))
         return 0
 
     if args.cmd == "attribute":
@@ -117,6 +165,42 @@ def main(argv: list[str] | None = None) -> int:
             "marginal": report.marginal,
             "interaction": {f"{a}|{b}": v for (a, b), v in report.interaction.items()},
             "shapley": report.shapley,
+        }
+        print(json.dumps(payload, indent=2))
+        return 0
+
+    if args.cmd == "tie-in":
+        decision = tie_in_decision(defer_periods=args.defer)
+        payload = {
+            "which_pads": decision.which_pads,
+            "when": decision.when,
+            "compressor_worth_buying": decision.compressor_worth_buying,
+            "compressor_capex_breakeven": decision.compressor_capex_breakeven,
+            "what_limits_second_pad": decision.what_limits_second_pad,
+            "preferred": {
+                "name": decision.preferred.name,
+                "npv": decision.preferred.result.objective,
+                "capital": decision.preferred.capital,
+                "first_gas_period": decision.preferred.first_gas_period,
+                "second_pad_period": decision.preferred.second_pad_period,
+                "hydraulic_ok": decision.preferred.hydraulic_ok,
+                "starts": [
+                    {"project": s.project_id, "start": s.start_period}
+                    for s in decision.preferred.plan.starts
+                ],
+            },
+            "plans": [
+                {
+                    "name": p.name,
+                    "npv": p.result.objective,
+                    "capital": p.capital,
+                    "total_gas": p.total_gas,
+                    "first_gas_period": p.first_gas_period,
+                    "second_pad_period": p.second_pad_period,
+                    "hydraulic_ok": p.hydraulic_ok,
+                }
+                for p in decision.plans
+            ],
         }
         print(json.dumps(payload, indent=2))
         return 0

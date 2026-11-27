@@ -27,6 +27,17 @@ FieldModel inventory
 Plan
   → attribute (standalone, marginal, interaction, Shapley)
   proof: tests/test_attribution.py
+20-pad / 5-facility inventory
+  → optimize_portfolio(method=benders)
+  → attribute + economics_project_list handoff
+  proof: tests/test_operator_scale.py
+network-hydraulics two_pad_gathering
+  → shared gas capacity (Mcf/period)
+  → enumerate_tie_in_plans / tie_in_decision
+  → NPV + timing + compressor breakeven
+  → verify_schedule_against_hydraulics
+  proof: tests/test_two_pad_tie_in.py
+  CLI: fieldvet tie-in
 
 DUPLICATE PATHS
 landmark-decision-simulation evaluation/portfolio.py
@@ -57,5 +68,5 @@ fieldvet network|optimize|attribute on toy field
 STATUS
 MOVED_NOT_WIRED → no: greenfield owner
 DUPLICATED meaning with decision-simulation knapsack → NO (different capability)
-partial: ARIES reconcile, PARETO water bind, operator-scale fixture still open
+partial: ARIES / landmark-economics fiscal reconcile and PARETO water bind still open
 ```

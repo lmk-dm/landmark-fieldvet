@@ -8,6 +8,7 @@ from landmark_fieldvet.examples.two_pad_tie_in import (
     compressor_capex_breakeven,
     enumerate_tie_in_plans,
     preferred_plan,
+    tie_in_decision,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "compressor_capex_breakeven",
     "enumerate_tie_in_plans",
     "preferred_plan",
+    "tie_in_decision",
 ]
