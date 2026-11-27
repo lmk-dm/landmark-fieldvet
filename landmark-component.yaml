@@ -21,6 +21,10 @@ produces:
   - capacity_shadow_prices
   - project_value_attribution
   - debottleneck_candidates
+  - fiscal_reconcile_report
+  - proposed_facility_projects
+  - scenario_cvar_evaluation
+  - hindcast_validation_report
 interfaces:
   cli: true
   api: false

@@ -15,7 +15,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
-pareto = []  # reserved: DOE PARETO water network reuse
+pareto = ["project-pareto>=0.9"]
+economics = ["sqlalchemy>=2.0"]  # landmark-economics resolved from workspace path
 
 [project.scripts]
 fieldvet = "landmark_fieldvet.cli:main"

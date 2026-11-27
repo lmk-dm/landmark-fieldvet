@@ -22,13 +22,17 @@ Design: [`docs/FieldVET_Design_v2.md`](docs/FieldVET_Design_v2.md).
 | Dual-bottleneck parity / scaling probe | **active** |
 | 20-pad / 5-facility operator-scale | **active** (integrated certifies NPV; Benders matches) |
 | Benders formal gap closure | **active** through 16 pads; open at 20 |
-| Economics project-list handoff (volumes + timing) | **active** (not fiscal reconcile) |
-| ARIES / `landmark-economics` fiscal reconcile | reserved |
-| DOE PARETO water reuse | reserved |
+| Economics project-list handoff (volumes + timing) | **active** |
+| ARIES / `landmark-economics` fiscal reconcile | **active** (volume DCF via `reconcile_plan`) |
+| Auto-propose facilities from shadow prices | **active** (`propose_facility_projects`) |
+| Price scenarios + CVaR | **active** (`evaluate_plan_scenarios`) |
+| Hindcast vs reported production CSV | **active** (public two-pad case) |
+| DOE PARETO water reuse | **adapter** (`water_request_from_model`; solve needs `project-pareto`) |
+| Open public case | **active** (`cases/public_two_pad`, Apache-2.0) |
 
 ## What this does not own
 
-- DCF / fiscal regimes → `landmark-economics` (ARIES is the reported economics path)
+- DCF kernel itself → `landmark-economics` (FieldVET calls it for reconcile; does not reimplement)
 - DSU pattern / spacing search → `landmark-dsu`
 - Fixed-EV capital/rig knapsack → `landmark-decision-simulation`
 - Gathering curtailment on a **given** schedule → `landmark-dsu` fieldopt-plan
@@ -55,6 +59,10 @@ fieldvet optimize --case dual --solver benders --pads 4 --periods 12
 fieldvet optimize --case operator --solver benders --export /tmp/handoff.json
 fieldvet attribute
 fieldvet tie-in                      # hydraulic capacities → which / when / compressor
+fieldvet reconcile                   # landmark-economics fiscal NPV on the plan
+fieldvet propose                     # auto facility projects from shadow prices
+fieldvet scenarios                   # price scenarios + CVaR
+fieldvet hindcast                   # validate vs cases/public_two_pad CSV
 ```
 
 ```python

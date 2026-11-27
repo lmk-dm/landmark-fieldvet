@@ -13,9 +13,14 @@ from landmark_fieldvet.examples import (
     tie_in_decision,
 )
 from landmark_fieldvet.export import economics_project_list
+from landmark_fieldvet.hindcast import load_reported_production_csv, validate_fixed_plan
 from landmark_fieldvet.master import optimize_portfolio
-from landmark_fieldvet.models import Plan, StartDecision
+from landmark_fieldvet.models import Plan, Prices, StartDecision
 from landmark_fieldvet.network import solve_network
+from landmark_fieldvet.propose import propose_facility_projects
+from landmark_fieldvet.reconcile import reconcile_plan
+from landmark_fieldvet.scenarios import Scenario, evaluate_plan_scenarios
+from pathlib import Path
 
 
 def _plan_payload(opt) -> dict:
@@ -88,6 +93,20 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=6,
         help="periods to defer the second pad / late upgrade plans",
+    )
+
+    sub.add_parser("reconcile", help="Fiscal reconcile toy both+expand via landmark-economics")
+    sub.add_parser("propose", help="Propose facility projects from toy both-pads shadow prices")
+    sub.add_parser("scenarios", help="Price scenarios + CVaR on toy both-pads plan")
+    p_hc = sub.add_parser("hindcast", help="Validate fixed plan vs reported_production.csv")
+    p_hc.add_argument(
+        "--csv",
+        default=str(
+            Path(__file__).resolve().parents[2]
+            / "cases"
+            / "public_two_pad"
+            / "reported_production.csv"
+        ),
     )
 
     args = parser.parse_args(argv)
@@ -193,6 +212,93 @@ def main(argv: list[str] | None = None) -> int:
         }
         print(json.dumps(payload, indent=2))
         return 0
+
+    if args.cmd == "reconcile":
+        model = build_toy_field()
+        plan = Plan(
+            starts=(
+                StartDecision("pad_a", 0),
+                StartDecision("pad_b", 0),
+                StartDecision("comp_expand", 0),
+            )
+        )
+        network = solve_network(model, plan)
+        report = reconcile_plan(model, plan, network)
+        print(json.dumps(report.to_dict(), indent=2))
+        return 0
+
+    if args.cmd == "propose":
+        model = build_toy_field()
+        result = solve_network(
+            model,
+            Plan(starts=(StartDecision("pad_a", 0), StartDecision("pad_b", 0))),
+        )
+        proposed = propose_facility_projects(
+            model,
+            result,
+            expand_cost_per_unit={"comp_gas": 1.0},
+            capacity_add=100.0,
+            capital=1_000.0,
+        )
+        print(
+            json.dumps(
+                [
+                    {
+                        "id": p.id,
+                        "capital": list(p.capital),
+                        "capacity_adds": dict(p.capacity_adds),
+                    }
+                    for p in proposed
+                ],
+                indent=2,
+            )
+        )
+        return 0
+
+    if args.cmd == "scenarios":
+        model = build_toy_field()
+        plan = Plan(starts=(StartDecision("pad_a", 0), StartDecision("pad_b", 0)))
+        base = model.prices
+        scenarios = (
+            Scenario("base", 0.5, prices=base),
+            Scenario(
+                "low",
+                0.25,
+                prices=Prices(
+                    oil=base.oil * 0.7,
+                    gas=base.gas * 0.7,
+                    water_disposal=base.water_disposal,
+                    discount_rate_per_period=base.discount_rate_per_period,
+                ),
+            ),
+            Scenario(
+                "high",
+                0.25,
+                prices=Prices(
+                    oil=base.oil * 1.3,
+                    gas=base.gas * 1.3,
+                    water_disposal=base.water_disposal,
+                    discount_rate_per_period=base.discount_rate_per_period,
+                ),
+            ),
+        )
+        ev = evaluate_plan_scenarios(model, plan, scenarios, alpha=0.75)
+        print(json.dumps(ev.to_dict(), indent=2))
+        return 0
+
+    if args.cmd == "hindcast":
+        model = build_toy_field()
+        plan = Plan(
+            starts=(
+                StartDecision("pad_a", 0),
+                StartDecision("pad_b", 0),
+                StartDecision("comp_expand", 0),
+            )
+        )
+        reported = load_reported_production_csv(args.csv)
+        report = validate_fixed_plan(model, plan, reported, tol=0.01)
+        print(json.dumps(report.to_dict(), indent=2))
+        return 0 if report.passed else 2
 
     return 1
 

@@ -42,6 +42,25 @@ network-hydraulics two_pad_gathering
   → verify_schedule_against_hydraulics
   proof: tests/test_two_pad_tie_in.py
   CLI: fieldvet tie-in
+EconomicsHandoff
+  → reconcile_plan → landmark_economics.dcf.run_dcf_from_forecast
+  proof: tests/test_reconcile.py
+  CLI: fieldvet reconcile
+NetworkResult shadow prices
+  → propose_facility_projects → FieldModel.projects
+  proof: tests/test_propose.py
+  CLI: fieldvet propose
+fixed Plan + Scenario set
+  → evaluate_plan_scenarios (E[NPV], CVaR)
+  proof: tests/test_scenarios.py
+  CLI: fieldvet scenarios
+reported_production.csv (public case)
+  → validate_fixed_plan
+  proof: tests/test_hindcast.py
+  CLI: fieldvet hindcast
+FieldModel water arcs
+  → water_request_from_model → DOE PARETO (optional project-pareto)
+  proof: tests/test_pareto.py
 
 DUPLICATE PATHS
 landmark-decision-simulation evaluation/portfolio.py
@@ -72,5 +91,6 @@ fieldvet network|optimize|attribute on toy field
 STATUS
 MOVED_NOT_WIRED → no: greenfield owner
 DUPLICATED meaning with decision-simulation knapsack → NO (different capability)
-partial: Benders dual-gap closure at 20 pads; ARIES fiscal reconcile; PARETO water
+partial: Benders dual-gap closure at 20 pads; full ARIES deck binary path;
+  live PARETO solve_model data tables; volume-DCF reconcile + PARETO adapter active
 ```
