@@ -141,8 +141,9 @@ def main(argv: list[str] | None = None) -> int:
             model,
             method=args.solver,
             time_limit_sec=args.time_limit,
-            abs_tol=25.0 if args.case == "operator" else 1.0,
-            max_iterations=60 if args.case == "operator" else 80,
+            abs_tol=250.0 if args.case == "operator" else 1.0,
+            rel_tol=5e-2 if args.case == "operator" else 1e-4,
+            max_iterations=120 if args.case == "operator" else 80,
         )
         payload = _plan_payload(opt)
         if args.export:

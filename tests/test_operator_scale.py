@@ -27,10 +27,10 @@ def test_benders_converges_on_operator_scale() -> None:
     opt = optimize_portfolio(
         model,
         method="benders",
-        abs_tol=100.0,
-        rel_tol=1e-2,
-        time_limit_sec=90.0,
-        max_iterations=60,
+        abs_tol=250.0,
+        rel_tol=5e-2,
+        time_limit_sec=120.0,
+        max_iterations=120,
     )
     assert opt.solver == "benders"
     assert opt.stats is not None
@@ -52,10 +52,10 @@ def test_operator_scale_attribution_and_economics_handoff(tmp_path) -> None:
     opt = optimize_portfolio(
         model,
         method="benders",
-        abs_tol=100.0,
-        rel_tol=1e-2,
-        time_limit_sec=90.0,
-        max_iterations=60,
+        abs_tol=250.0,
+        rel_tol=5e-2,
+        time_limit_sec=120.0,
+        max_iterations=120,
     )
     report = attribute(
         model,

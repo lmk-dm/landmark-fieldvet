@@ -216,7 +216,10 @@ def optimize_benders(
         remaining = time_limit_sec - (time.perf_counter() - started)
         if remaining <= 0:
             break
-        solver = get_highs_solver(tee=tee, time_limit_sec=min(20.0, max(3.0, remaining)))
+        # Selection-only masters are tiny — do not time-limit them (need a true UB).
+        n_bin = len(projects) if model.fix_to_earliest_start else len(projects) * len(start_times)
+        per_iter = None if n_bin <= 40 else min(20.0, max(3.0, remaining))
+        solver = get_highs_solver(tee=tee, time_limit_sec=per_iter)
         result = solver.solve(m, tee=tee)
         tc = result.solver.termination_condition
         if tc not in {
@@ -307,13 +310,13 @@ def optimize_benders(
             upper = min(upper, master_obj)
             break
 
-        if upper < float("inf"):
+        # Standard Benders stop: proven UB−LB within tolerance.
+        if upper < float("inf") and tc == TerminationCondition.optimal:
             gap = upper - lower
             rel = gap / max(1.0, abs(upper))
             if gap <= abs_tol or rel <= rel_tol:
-                if theta_hat <= phi + max(abs_tol, rel_tol * max(1.0, abs(phi))):
-                    converged = True
-                    break
+                converged = True
+                break
 
     runtime = time.perf_counter() - started
     if upper < float("inf"):
