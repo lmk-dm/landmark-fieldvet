@@ -15,12 +15,13 @@ Design: [`docs/FieldVET_Design_v2.md`](docs/FieldVET_Design_v2.md).
 | Capability | Status |
 |---|---|
 | Network flow + curtailment for a fixed plan | **active** (Pyomo + HiGHS) |
-| Capacity shadow prices / debottleneck hints | **active** |
-| Selection + timing MILP (small areas) | **active** (integrated) |
+| Capacity + forecast duals / debottleneck hints | **active** |
+| Selection + timing MILP (small areas) | **active** (`--solver integrated`, default) |
+| Benders master ↔ network LP | **active** (`--solver benders`) |
 | Standalone / marginal / interaction / Shapley | **active** (exact Shapley for n≤6) |
-| Benders master ↔ network loop | not yet |
-| ARIES / `landmark-economics` fiscal reconcile | not yet |
-| DOE PARETO water reuse | reserved extra |
+| Dual-bottleneck parity / scaling probe | **active** |
+| ARIES / `landmark-economics` fiscal reconcile | reserved |
+| DOE PARETO water reuse | reserved |
 
 ## What this does not own
 
@@ -45,7 +46,9 @@ pytest
 ```bash
 fieldvet network --pads a,b          # curtailment on shared compressor
 fieldvet network --pads a,b --expand # expansion clears curtailment
-fieldvet optimize
+fieldvet optimize                    # integrated MILP (default)
+fieldvet optimize --solver benders
+fieldvet optimize --case dual --solver benders --pads 4 --periods 12
 fieldvet attribute
 ```
 

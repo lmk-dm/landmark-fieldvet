@@ -1,17 +1,15 @@
 """Selection-and-timing master.
 
-Version 1 ships an integrated MILP for small areas. Curtailment stays linear by
-letting each started development contribute a continuous fraction ``z ≤ x`` of
-its type curve in each period (same fraction for oil, gas, and water).
-
-The network-only LP remains the validation path for a fixed plan and the source
-of capacity duals. A Benders loop can replace this integrated form later without
-changing the Plan / NetworkResult contracts.
+Default solver is the integrated MILP (reference for cases it can certify).
+``method="benders"`` keeps binaries in a master problem and reuses the
+fixed-plan network LP as the operating subproblem.
 """
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
+from typing import Any, Literal
 
 from pyomo.environ import (
     Binary,
@@ -37,16 +35,56 @@ from landmark_fieldvet.models import (
 from landmark_fieldvet.network import NetworkResult, solve_network
 from landmark_fieldvet.solvers import get_highs_solver
 
+SolverMethod = Literal["integrated", "benders"]
+
 
 @dataclass(frozen=True)
 class OptimizeResult:
     plan: Plan
     network: NetworkResult
     objective: float
+    solver: str = "integrated"
+    runtime_sec: float = 0.0
+    stats: Any | None = None
 
 
-def optimize_portfolio(model: FieldModel, *, tee: bool = False) -> OptimizeResult:
+def optimize_portfolio(
+    model: FieldModel,
+    *,
+    method: SolverMethod = "integrated",
+    tee: bool = False,
+    abs_tol: float = 1.0,
+    rel_tol: float = 1e-4,
+    time_limit_sec: float = 120.0,
+    max_iterations: int = 80,
+) -> OptimizeResult:
     """Choose starts to maximize network-priced NPV under budgets and logic."""
+    if method == "benders":
+        from landmark_fieldvet.benders import optimize_benders
+
+        result = optimize_benders(
+            model,
+            tee=tee,
+            abs_tol=abs_tol,
+            rel_tol=rel_tol,
+            time_limit_sec=time_limit_sec,
+            max_iterations=max_iterations,
+        )
+        return OptimizeResult(
+            plan=result.plan,
+            network=result.network,
+            objective=result.objective,
+            solver="benders",
+            runtime_sec=result.stats.runtime_sec,
+            stats=result.stats,
+        )
+    if method != "integrated":
+        raise ValueError(f"unknown solver method: {method!r}")
+    return _optimize_integrated(model, tee=tee)
+
+
+def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeResult:
+    started = time.perf_counter()
     n = model.n_periods
     prices = model.prices
     projects = list(model.projects)
@@ -237,4 +275,10 @@ def optimize_portfolio(model: FieldModel, *, tee: bool = False) -> OptimizeResul
                 starts.append(StartDecision(p.id, t))
     plan = Plan(starts=tuple(starts))
     network = solve_network(model, plan, tee=tee)
-    return OptimizeResult(plan=plan, network=network, objective=float(value(m.obj)))
+    return OptimizeResult(
+        plan=plan,
+        network=network,
+        objective=network.objective,
+        solver="integrated",
+        runtime_sec=time.perf_counter() - started,
+    )

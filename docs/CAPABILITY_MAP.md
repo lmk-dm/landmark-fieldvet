@@ -15,9 +15,15 @@ fixed Plan
   proof: tests/test_network_curtailment.py
   proof: tests/test_shadow_prices.py
 FieldModel inventory
-  → optimize_portfolio (integrated MILP)
+  → optimize_portfolio(method=integrated)  # default reference
   → Plan + re-solved network duals
   proof: tests/test_selection_timing.py
+FieldModel inventory
+  → optimize_portfolio(method=benders)
+  → master binaries + network LP cuts
+  → same Plan / NetworkResult contracts
+  proof: tests/test_benders_parity.py
+  proof: tests/test_benders_scaling.py
 Plan
   → attribute (standalone, marginal, interaction, Shapley)
   proof: tests/test_attribution.py
@@ -51,5 +57,5 @@ fieldvet network|optimize|attribute on toy field
 STATUS
 MOVED_NOT_WIRED → no: greenfield owner
 DUPLICATED meaning with decision-simulation knapsack → NO (different capability)
-partial: Benders, ARIES reconcile, PARETO water bind still open
+partial: ARIES reconcile, PARETO water bind, operator-scale fixture still open
 ```

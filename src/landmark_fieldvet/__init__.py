@@ -1,6 +1,7 @@
 """FieldVET: network-aware upstream project selection and value attribution."""
 
 from landmark_fieldvet.attribution import AttributionReport, attribute
+from landmark_fieldvet.benders import BendersResult, BendersStats, optimize_benders
 from landmark_fieldvet.master import OptimizeResult, optimize_portfolio
 from landmark_fieldvet.models import (
     Arc,
@@ -22,6 +23,8 @@ from landmark_fieldvet.plan_effects import PlanEffects, apply_plan
 __all__ = [
     "Arc",
     "AttributionReport",
+    "BendersResult",
+    "BendersStats",
     "Commodity",
     "FieldModel",
     "Network",
@@ -39,6 +42,7 @@ __all__ = [
     "apply_plan",
     "attribute",
     "debottleneck_candidates",
+    "optimize_benders",
     "optimize_portfolio",
     "solve_network",
 ]
