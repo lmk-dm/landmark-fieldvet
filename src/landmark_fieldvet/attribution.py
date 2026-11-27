@@ -44,6 +44,8 @@ def attribute(
     shapley_samples: int = 64,
     seed: int = 0,
     portfolio_result: NetworkResult | None = None,
+    include_interaction: bool | None = None,
+    include_shapley: bool = True,
 ) -> AttributionReport:
     starts = plan.start_map()
     ids = list(starts.keys())
@@ -63,15 +65,25 @@ def attribute(
         without = {k: v for k, v in starts.items() if k != j}
         marginal[j] = portfolio - _npv(model, without)
 
+    # Pairwise interaction is O(n²) network solves; skip by default on large plans.
+    if include_interaction is None:
+        include_interaction = len(ids) <= 8
     interaction: dict[tuple[str, str], float] = {}
-    for a, b in itertools.combinations(ids, 2):
-        both = _npv(model, {a: starts[a], b: starts[b]})
-        only_a = _npv(model, {a: starts[a]})
-        only_b = _npv(model, {b: starts[b]})
-        # v({a,b}) - v({a}) - v({b}) + v({})
-        interaction[(a, b)] = both - only_a - only_b + empty
+    if include_interaction:
+        for a, b in itertools.combinations(ids, 2):
+            both = _npv(model, {a: starts[a], b: starts[b]})
+            only_a = _npv(model, {a: starts[a]})
+            only_b = _npv(model, {b: starts[b]})
+            # v({a,b}) - v({a}) - v({b}) + v({})
+            interaction[(a, b)] = both - only_a - only_b + empty
 
-    shapley = _sample_shapley(model, starts, samples=shapley_samples, seed=seed, empty=empty)
+    shapley: dict[str, float] = {}
+    samples_used = 0
+    if include_shapley:
+        samples_used = shapley_samples
+        shapley = _sample_shapley(
+            model, starts, samples=shapley_samples, seed=seed, empty=empty
+        )
 
     return AttributionReport(
         portfolio_npv=portfolio,
@@ -79,7 +91,7 @@ def attribute(
         marginal=marginal,
         interaction=interaction,
         shapley=shapley,
-        shapley_samples=shapley_samples,
+        shapley_samples=samples_used,
     )
 
 

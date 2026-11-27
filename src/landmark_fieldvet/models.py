@@ -135,9 +135,27 @@ class FieldModel:
     prices: Prices
     capital_budget: Sequence[float] | None = None
     """Optional per-period capital caps. None means unconstrained capital."""
+    start_candidates: tuple[int, ...] | None = None
+    """If set, projects may start only in these periods (coarser timing grid)."""
+    fix_to_earliest_start: bool = False
+    """If true, each project may start only at its earliest_start (selection + staggered timing)."""
 
     def project_by_id(self) -> dict[str, Project]:
         return {p.id: p for p in self.projects}
+
+    def allowed_starts(self) -> tuple[int, ...]:
+        if self.fix_to_earliest_start:
+            epochs = sorted({p.earliest_start for p in self.projects})
+            for t in epochs:
+                if t < 0 or t >= self.n_periods:
+                    raise ValueError(f"earliest_start {t} outside [0, {self.n_periods})")
+            return tuple(epochs)
+        if self.start_candidates is None:
+            return tuple(range(self.n_periods))
+        for t in self.start_candidates:
+            if t < 0 or t >= self.n_periods:
+                raise ValueError(f"start candidate {t} outside [0, {self.n_periods})")
+        return self.start_candidates
 
 
 @dataclass(frozen=True)

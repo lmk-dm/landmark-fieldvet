@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 
-def get_highs_solver(*, tee: bool = False) -> Any:
+def get_highs_solver(*, tee: bool = False, time_limit_sec: float | None = None) -> Any:
     """Return a Pyomo SolverFactory bound to HiGHS via highspy."""
     from pyomo.environ import SolverFactory
 
@@ -25,6 +25,18 @@ def get_highs_solver(*, tee: bool = False) -> Any:
     if hasattr(solver, "config"):
         try:
             solver.config.stream_solver = tee
+        except Exception:
+            pass
+        if time_limit_sec is not None:
+            try:
+                solver.config.time_limit = float(time_limit_sec)
+            except Exception:
+                pass
+    if time_limit_sec is not None and hasattr(solver, "highs_options"):
+        try:
+            opts = dict(getattr(solver, "highs_options", {}) or {})
+            opts["time_limit"] = float(time_limit_sec)
+            solver.highs_options = opts
         except Exception:
             pass
     return solver

@@ -90,6 +90,7 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
     projects = list(model.projects)
     arcs = list(model.network.arcs)
     nodes = list(model.network.nodes)
+    start_times = model.allowed_starts()
     pads = sorted(
         {
             p.pad_node
@@ -103,6 +104,7 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
 
     m = ConcreteModel(name="fieldvet_master")
     m.T = RangeSet(0, n - 1)
+    m.TAU = Set(initialize=list(start_times))
     m.J = Set(initialize=[p.id for p in projects])
     m.JD = Set(initialize=[p.id for p in devel])
     m.ARCS = Set(initialize=[a.id for a in arcs])
@@ -110,16 +112,16 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
     m.NODES = Set(initialize=[nd.id for nd in nodes])
     m.COMMODITIES = Set(initialize=[c.value for c in Commodity])
 
-    m.x = Var(m.J, m.T, domain=Binary)
+    m.x = Var(m.J, m.TAU, domain=Binary)
     # z[j,τ,t]: fraction of start (j,τ) that is produced in period t (≤ x[j,τ]).
-    m.z = Var(m.JD, m.T, m.T, domain=NonNegativeReals, bounds=(0.0, 1.0))
+    m.z = Var(m.JD, m.TAU, m.T, domain=NonNegativeReals, bounds=(0.0, 1.0))
     m.flow = Var(m.ARCS, m.T, domain=NonNegativeReals)
     m.sink = Var(m.NODES, m.COMMODITIES, m.T, domain=NonNegativeReals)
     m.cap = Var(m.ARCS, m.T, domain=NonNegativeReals)
     m.capital = Var(m.T, domain=NonNegativeReals)
 
     def one_start_rule(mm, j):
-        return sum(mm.x[j, t] for t in mm.T) <= 1
+        return sum(mm.x[j, t] for t in mm.TAU) <= 1
 
     m.one_start = Constraint(m.J, rule=one_start_rule)
 
@@ -129,7 +131,15 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
             return mm.x[j, t] == 0
         return Constraint.Skip
 
-    m.earliest = Constraint(m.J, m.T, rule=earliest_rule)
+    m.earliest = Constraint(m.J, m.TAU, rule=earliest_rule)
+
+    if model.fix_to_earliest_start:
+        def fix_earliest_rule(mm, j, t):
+            if t != model.project_by_id()[j].earliest_start:
+                return mm.x[j, t] == 0
+            return Constraint.Skip
+
+        m.fix_earliest = Constraint(m.J, m.TAU, rule=fix_earliest_rule)
 
     groups: dict[str, list[str]] = {}
     for p in projects:
@@ -141,23 +151,23 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
 
         def group_rule(mm, g):
             members = groups[g]
-            return sum(mm.x[j, t] for j in members for t in mm.T) <= 1
+            return sum(mm.x[j, t] for j in members for t in mm.TAU) <= 1
 
         m.group_excl = Constraint(m.GROUPS, rule=group_rule)
 
-    extra = [(p.id, r, t) for p in projects for r in p.requires for t in range(n)]
+    extra = [(p.id, r, t) for p in projects for r in p.requires for t in start_times]
     if extra:
         m.REQ = Set(initialize=extra, dimen=3)
 
         def requires_pair_rule(mm, j, r, t):
-            return sum(mm.x[r, tau] for tau in mm.T if tau <= t) >= mm.x[j, t]
+            return sum(mm.x[r, tau] for tau in mm.TAU if tau <= t) >= mm.x[j, t]
 
         m.requires_pair = Constraint(m.REQ, rule=requires_pair_rule)
 
     def z_bound_rule(mm, j, tau, t):
         return mm.z[j, tau, t] <= mm.x[j, tau]
 
-    m.z_bound = Constraint(m.JD, m.T, m.T, rule=z_bound_rule)
+    m.z_bound = Constraint(m.JD, m.TAU, m.T, rule=z_bound_rule)
 
     def z_before_online_rule(mm, j, tau, t):
         lead = model.project_by_id()[j].lead_time
@@ -165,7 +175,7 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
             return mm.z[j, tau, t] == 0
         return Constraint.Skip
 
-    m.z_before = Constraint(m.JD, m.T, m.T, rule=z_before_online_rule)
+    m.z_before = Constraint(m.JD, m.TAU, m.T, rule=z_before_online_rule)
 
     base = {a.id: a.base_capacity for a in arcs}
 
@@ -174,7 +184,7 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
         for p in projects:
             if a not in p.capacity_adds:
                 continue
-            for tau in range(n):
+            for tau in start_times:
                 if tau + p.lead_time <= t:
                     add += p.capacity_adds[a] * mm.x[p.id, tau]
         return mm.cap[a, t] == base[a] + add
@@ -189,7 +199,7 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
     def capital_def_rule(mm, t):
         total = 0.0
         for p in projects:
-            for tau in range(n):
+            for tau in start_times:
                 age = t - tau
                 spend = p.capital[age] if 0 <= age < len(p.capital) else 0.0
                 total += spend * mm.x[p.id, tau]
@@ -213,7 +223,7 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
         for p in devel:
             if p.pad_node != pad or p.type_curve is None:
                 continue
-            for tau in range(n):
+            for tau in start_times:
                 online_from = tau + p.lead_time
                 age = t - online_from
                 rate = p.type_curve.at(age, c) if age >= 0 else 0.0
@@ -270,7 +280,7 @@ def _optimize_integrated(model: FieldModel, *, tee: bool = False) -> OptimizeRes
 
     starts: list[StartDecision] = []
     for p in projects:
-        for t in range(n):
+        for t in start_times:
             if value(m.x[p.id, t]) > 0.5:
                 starts.append(StartDecision(p.id, t))
     plan = Plan(starts=tuple(starts))

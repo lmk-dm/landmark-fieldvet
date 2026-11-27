@@ -17,10 +17,13 @@ from landmark_fieldvet.models import (
     StartDecision,
     TypeCurve,
 )
+from landmark_fieldvet.export import EconomicsHandoff, ExportedProject, economics_project_list
 from landmark_fieldvet.network import NetworkResult, debottleneck_candidates, solve_network
 from landmark_fieldvet.plan_effects import PlanEffects, apply_plan
 
 __all__ = [
+    "EconomicsHandoff",
+    "ExportedProject",
     "Arc",
     "AttributionReport",
     "BendersResult",
@@ -42,6 +45,7 @@ __all__ = [
     "apply_plan",
     "attribute",
     "debottleneck_candidates",
+    "economics_project_list",
     "optimize_benders",
     "optimize_portfolio",
     "solve_network",
